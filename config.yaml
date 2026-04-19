@@ -1,0 +1,50 @@
+project_name: news_topic_pipeline
+text_column: text
+label_column: label
+zero_shot_model: facebook/bart-large-mnli
+labels_list:
+  - world
+  - sports
+  - business
+  - sci_tech
+sources:
+  - type: hf_dataset
+    name: ag_news
+    source: hf
+    split: train
+    sample_n: 2000
+  - type: scrape
+    url: https://rss.nytimes.com/services/xml/rss/nyt/World.xml
+    selector: item > title
+    assigned_label: world
+    sample_n: 120
+  - type: scrape
+    url: https://rss.nytimes.com/services/xml/rss/nyt/Sports.xml
+    selector: item > title
+    assigned_label: sports
+    sample_n: 120
+  - type: scrape
+    url: https://rss.nytimes.com/services/xml/rss/nyt/Business.xml
+    selector: item > title
+    assigned_label: business
+    sample_n: 120
+  - type: scrape
+    url: https://rss.nytimes.com/services/xml/rss/nyt/Technology.xml
+    selector: item > title
+    assigned_label: sci_tech
+    sample_n: 120
+quality_strategy:
+  missing: drop
+  duplicates: drop
+  outliers: clip_iqr
+  labels: normalize
+annotation:
+  modality: text
+  method: keyword_heuristic
+  low_conf_threshold: 0.65
+active_learning:
+  model: logreg
+  strategy: entropy
+  initial_size: 80
+  n_iterations: 5
+  batch_size: 25
